@@ -2330,7 +2330,7 @@ u32 ddl_set_default_decoder_buffer_req(struct ddl_decoder_data *decoder,
 	}
 	input_buf_req->align = DDL_LINEAR_BUFFER_ALIGN_BYTES;
 	decoder->min_input_buf_req = *input_buf_req;
-	if (frame_height_actual) {
+	if (frame_height_actual && frame_size->height > MDP_MIN_TILE_HEIGHT) {
 		frame_size->height = frame_height_actual;
 		ddl_calculate_stride(frame_size, !decoder->progressive_only);
 	}
@@ -2531,3 +2531,4 @@ void ddl_set_initial_default_values(struct ddl_client_context *ddl)
 		encoder->sps_pps.sps_pps_for_idr_enable_flag = false;
 	}
 }
+
