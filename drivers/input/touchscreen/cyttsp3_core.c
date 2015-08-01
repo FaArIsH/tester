@@ -194,7 +194,7 @@
 #define D2W_FEATHER    50
 #define D2W_TIME       700
 
-int d2w_switch = 1;
+int d2w_switch = 0;
 int s2w_switch = 0; 
 int mm_switch = 0;
 int s2w_right = 0;
