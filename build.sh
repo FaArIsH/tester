@@ -19,7 +19,7 @@
 # export CROSS_COMPILE="/root/linaro/4.9.3-2014.12.20141230.CR83/bin/arm-eabi-"
 STRIP="/home/corphish/android/toolchain/linaro-4.9.3-arm-cortex-a15/bin/arm-eabi-strip"
 MODULES_DIR="/home/corphish/android/kernel/taoshan/android_kernel_sony_msm8930-cm-12.1/modules"
-ZIMAGE="/home/corphish/android/kernel/taoshan/android_kernel_sony_msm8930-cm-12.1/arch/arm/boot/zImage"
+ZIMAGE="/home/corphish/android/kernel/taoshan/android_kernel_sony_msm8930_cm-12.1/arch/arm/boot/zImage"
 KERNEL_DIR="/home/corphish/android/kernel/taoshan/android_kernel_sony_msm8930-cm-12.1"
 MKBOOTIMG="/home/corphish/android/binaries/mkbootimg"
 MKBOOTFS="/home/corphish/android/binaries/mkbootfs"
@@ -62,3 +62,6 @@ else
 echo "Compilation failed! Fix the errors!"
 fi
 
+BUILD_END=$(date +"%s")
+DIFF=$(($BUILD_END - $BUILD_START))
+echo "Build completed in ${BLUE}$(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.${NC}"

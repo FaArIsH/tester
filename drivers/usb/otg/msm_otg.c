@@ -51,6 +51,10 @@
 #include <mach/msm_bus.h>
 #include <mach/rpm-regulator.h>
 
+#ifdef CONFIG_ZAPDOS_CHARGER_CONTROL
+#include <linux/zapdos_charger_control.h>
+#endif
+
 #define MSM_USB_BASE	(motg->regs)
 #define DRIVER_NAME	"msm_otg"
 
@@ -1153,10 +1157,25 @@ static void msm_otg_notify_charger(struct msm_otg *motg, unsigned mA)
 	 *  Use Power Supply API if supported, otherwise fallback
 	 *  to legacy pm8921 API.
 	 */
-	if (msm_otg_notify_power_supply(motg, mA))
+	if (msm_otg_notify_power_supply(motg, mA)) {
+#ifdef CONFIG_ZAPDOS_CHARGER_CONTROL
+		if(master_switch)
+			pm8921_charger_vbus_draw(custom_current);
+		else
+			pm8921_charger_vbus_draw(mA);
+#else
 		pm8921_charger_vbus_draw(mA);
+#endif
+	}
 
+#ifdef CONFIG_ZAPDOS_CHARGER_CONTROL
+	if(master_switch)
+		motg->cur_power = custom_current;
+	else
+		motg->cur_power = mA;
+#else
 	motg->cur_power = mA;
+#endif
 }
 
 static int msm_otg_set_power(struct usb_phy *phy, unsigned mA)

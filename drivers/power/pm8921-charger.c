@@ -34,6 +34,10 @@
 #include <mach/msm_xo.h>
 #include <mach/msm_hsusb.h>
 
+#ifdef CONFIG_ZAPDOS_CHARGER_CONTROL
+#include <linux/zapdos_charger_control.h>
+#endif
+
 #define CHG_BUCK_CLOCK_CTRL	0x14
 #define CHG_BUCK_CLOCK_CTRL_8038	0xD
 
@@ -1537,8 +1541,11 @@ static enum power_supply_property pm_power_props_mains[] = {
 static char *pm_power_supplied_to[] = {
 	"battery",
 };
-
+#ifdef CONFIG_ZAPDOS_CHARGER_CONTROL
+int USB_WALL_THRESHOLD_MA = 500;
+#else
 #define USB_WALL_THRESHOLD_MA	500
+#endif
 static int AC_reported_exist = 0;//YF
 static int pm_power_get_property_mains(struct power_supply *psy,
 				  enum power_supply_property psp,
@@ -2454,8 +2461,19 @@ void pm8921_charger_vbus_draw(unsigned int mA)
 		usb_target_ma = mA;
 
 
-	if (mA > USB_WALL_THRESHOLD_MA)
+	if (mA > USB_WALL_THRESHOLD_MA) {
+#ifdef CONFIG_ZAPDOS_CHARGER_CONTROL
+		if(master_switch) {
+			USB_WALL_THRESHOLD_MA = mA;
+			set_usb_now_ma = mA;
+		} else {
+			USB_WALL_THRESHOLD_MA = 500;
+			set_usb_now_ma = USB_WALL_THRESHOLD_MA;
+		}
+#else
 		set_usb_now_ma = USB_WALL_THRESHOLD_MA;
+#endif
+	}
 	else
 		set_usb_now_ma = mA;
 

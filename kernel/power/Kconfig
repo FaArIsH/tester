@@ -24,6 +24,15 @@ config HAS_WAKELOCK
 config HAS_EARLYSUSPEND
 	bool
 
+config POWERSUSPEND
+    bool "Power suspend"
+    default y
+    ---help---
+    Call early suspend handlers when the user requested sleep state
+    changes.
+
+
+
 config WAKELOCK
 	bool "Wake lock"
 	depends on PM && RTC_CLASS
