@@ -14,54 +14,53 @@
  #
  #
 #!/bin/bash
-# export CROSS_COMPILE="/root/toolchains/arm-eabi-linaro-4.6.2/bin/arm-eabi-"
-# export CROSS_COMPILE="/root/cm11/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7/bin/arm-eabi-"
-# export CROSS_COMPILE="/root/linaro/4.9.3-2014.12.20141230.CR83/bin/arm-eabi-"
-STRIP="/home/corphish/android/toolchain/linaro-4.9.3-arm-cortex-a15/bin/arm-eabi-strip"
-MODULES_DIR="/home/corphish/android/kernel/taoshan/android_kernel_sony_msm8930-cm-12.1/modules"
-ZIMAGE="/home/corphish/android/kernel/taoshan/android_kernel_sony_msm8930_cm-12.1/arch/arm/boot/zImage"
-KERNEL_DIR="/home/corphish/android/kernel/taoshan/android_kernel_sony_msm8930-cm-12.1"
-MKBOOTIMG="/home/corphish/android/binaries/mkbootimg"
-MKBOOTFS="/home/corphish/android/binaries/mkbootfs"
-ZIP_DIR="zip"
+#Tuneables
+STRIP="/home/corphish/android/toolchains/linaro/linaro-4.9.4/bin/arm-eabi-strip"
+ZIMAGE="/home/corphish/android/kernel/taoshan/5.1/arch/arm/boot/zImage"
+KERNEL_DIR="/home/corphish/android/kernel/taoshan/5.1"
+ZIP_DIR="/home/corphish/android/kernel/taoshan/5.1/zip/raw"
+KERNEL="zImage"
+blue='\033[0;34m'
+cyan='\033[0;36m'
+yellow='\033[0;33m'
+red='\033[0;31m'
+green='\033[0;32m'
+nocol='\033[0m'
+
+#Main
+echo -e "$blue Starting build...$nocol"
 BUILD_START=$(date +"%s")
 export ARCH=arm
 export SUBARCH=arm
-export CROSS_COMPILE=/home/corphish/android/toolchain/linaro-4.9.3-arm-cortex-a15/bin/arm-eabi-
-export KBUILD_BUILD_USER="corphish"
-export KBUILD_BUILD_HOST="Damned-PC"
+export CROSS_COMPILE=/home/corphish/android/toolchains/linaro/linaro-4.9.4/bin/arm-eabi-
+export KBUILD_BUILD_USER="avinaba"
+export KBUILD_BUILD_HOST="build"
+echo -e "$yellow Cleaning..$nocol"
 if [ -a $KERNEL_DIR/arch/arm/boot/zImage ];
 then
 rm $ZIMAGE
-rm modules/*
 fi
+echo -e "$yellow Building..$nocol"
 make cyanogenmod_taoshan_defconfig
-make -j32
+make
 if [ -a $ZIMAGE ];
 then
-echo "Copying modules"
+echo -e "$cyan Copying kernel..$nocol"
+cp $KERNEL_DIR/arch/arm/boot/$KERNEL $ZIP_DIR/tools/zImage
+echo -e "$cyan Copying modules..$nocol"
 rm ZIP_DIR/system/lib/modules/*
 find . -name '*.ko' -exec cp {} $ZIP_DIR/system/lib/modules \;
 cd $ZIP_DIR/system/lib/modules
-echo "Stripping modules for size"
+echo -e "$yellow Stripping modules for size..$nocol"
 $STRIP --strip-unneeded *.ko
-#zip -9 modules *
-#cd $KERNEL_DIR
-#echo "Creating boot image"
-#$MKBOOTFS ramdisk/ > $KERNEL_DIR/ramdisk.cpio
-#cat $KERNEL_DIR/ramdisk.cpio | gzip > $KERNEL_DIR/root.fs
-#$MKBOOTIMG --kernel $ZIMAGE --ramdisk $KERNEL_DIR/root.fs --cmdline "console=ttyHSL0,115200,n8 androidboot.hardware=qcom androidboot.selinux=permissive user_debug=31 msm_rtb.filter=0x3F ehci-hcd.park=3 maxcpus=2" --base 0x80200000 --pagesize 2048 --ramdiskaddr 0x02000000 -o $KERNEL_DIR/boot.img
-#cp boot.img $ZIP_DIR/
-#echo "Building flashable zip"
-#cd $ZIP_DIR
-#zip -r test *
 BUILD_END=$(date +"%s")
 DIFF=$(($BUILD_END - $BUILD_START))
-echo "Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds."
+echo -e "$yellow Zipping..$nocol"
+cd $KERNEL_DIR
+./zip.sh
+echo -e "$green Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nocol"
 else
-echo "Compilation failed! Fix the errors!"
+echo -e "$red Compilation failed! Fix the errors!$nocol"
 fi
 
-BUILD_END=$(date +"%s")
-DIFF=$(($BUILD_END - $BUILD_START))
-echo "Build completed in ${BLUE}$(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.${NC}"
+
