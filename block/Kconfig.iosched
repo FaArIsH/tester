@@ -64,6 +64,16 @@ config CFQ_GROUP_IOSCHED
 	---help---
 	  Enable group IO scheduling in CFQ.
 
+
+config IOSCHED_FIOPS
+	tristate "IOPS based I/O scheduler"
+	default y
+	---help---
+	  This is an IOPS based I/O scheduler. It will try to distribute
+          IOPS equally among all processes in the system. It's mainly for
+          Flash based storage.
+
+
 config IOSCHED_BFQ
 	tristate "BFQ I/O scheduler"
 	depends on EXPERIMENTAL
@@ -85,6 +95,7 @@ config CGROUP_BFQIO
 	  Enable hierarchical scheduling in BFQ, using the cgroups
 	  filesystem interface.  The name of the subsystem will be
 	  bfqio.
+
 
 config IOSCHED_FIOPS
 	tristate "IOPS based I/O scheduler"
@@ -128,6 +139,7 @@ config IOSCHED_ZEN
 	---help---
 	  The ZEN scheduler		  	
 
+
 choice
 	prompt "Default I/O scheduler"
 	default DEFAULT_CFQ
@@ -141,9 +153,14 @@ choice
 	config DEFAULT_CFQ
 		bool "CFQ" if IOSCHED_CFQ=y
 
+
 	config DEFAULT_SIO
                 bool "SIO" if IOSCHED_SIO=y
 	
+
+	config DEFAULT_FIOPS
+		bool "FIOPS" if IOSCHED_FIOPS=y
+
 	config DEFAULT_BFQ
 		bool "BFQ" if IOSCHED_BFQ=y
 		help
@@ -154,8 +171,10 @@ choice
 		  any workload. It also tries to guarantee low latency to
 		  interactive and soft real-time applications.
 
+
 	config DEFAULT_FIOPS
 		bool "FIOPS" if IOSCHED_FIOPS=y
+
 
 	config DEFAULT_NOOP
 		bool "No-op"
@@ -193,3 +212,4 @@ config DEFAULT_IOSCHED
 endmenu
 
 endif
+
