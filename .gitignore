@@ -86,6 +86,7 @@ GTAGS
 /zip/*
 zip.sh
 clean.sh
+sync.sh
 
 *.orig
 *~
