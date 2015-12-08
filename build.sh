@@ -20,47 +20,41 @@ ZIMAGE="/home/corphish/android/kernel/taoshan/5.1/arch/arm/boot/zImage"
 KERNEL_DIR="/home/corphish/android/kernel/taoshan/5.1"
 ZIP_DIR="/home/corphish/android/kernel/taoshan/5.1/zip/raw"
 KERNEL="zImage"
-blue='\033[0;34m'
-cyan='\033[0;36m'
-yellow='\033[0;33m'
-red='\033[0;31m'
-green='\033[0;32m'
-nocol='\033[0m'
 
 #Main
-echo -e "$blue Starting build...$nocol"
+echo "Starting build..."
 BUILD_START=$(date +"%s")
 export ARCH=arm
 export SUBARCH=arm
-export CROSS_COMPILE=/home/corphish/android/toolchains/linaro/linaro-4.9.4/bin/arm-eabi-
+export CROSS_COMPILE=/home/corphish/android/toolchains/gcc/4.8/bin/arm-eabi-
 export KBUILD_BUILD_USER="avinaba"
 export KBUILD_BUILD_HOST="build"
-echo -e "$yellow Cleaning..$nocol"
-if [ -a $KERNEL_DIR/arch/arm/boot/zImage ];
+echo "Cleaning.."
+if [ -f $KERNEL_DIR/arch/arm/boot/zImage ];
 then
 rm $ZIMAGE
 fi
-echo -e "$yellow Building..$nocol"
+echo "Building..."
 make cyanogenmod_taoshan_defconfig
 make
-if [ -a $ZIMAGE ];
+if [ -f $ZIMAGE ];
 then
-echo -e "$cyan Copying kernel..$nocol"
+echo "Copying kernel.."
 cp $KERNEL_DIR/arch/arm/boot/$KERNEL $ZIP_DIR/tools/zImage
-echo -e "$cyan Copying modules..$nocol"
-rm ZIP_DIR/system/lib/modules/*
+echo "Copying modules.."
+rm $ZIP_DIR/system/lib/modules/*
 find . -name '*.ko' -exec cp {} $ZIP_DIR/system/lib/modules \;
 cd $ZIP_DIR/system/lib/modules
-echo -e "$yellow Stripping modules for size..$nocol"
+echo "Stripping modules for size.."
 $STRIP --strip-unneeded *.ko
 BUILD_END=$(date +"%s")
 DIFF=$(($BUILD_END - $BUILD_START))
-echo -e "$yellow Zipping..$nocol"
+echo "Zipping.."
 cd $KERNEL_DIR
 ./zip.sh
-echo -e "$green Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds.$nocol"
+echo "Build completed in $(($DIFF / 60)) minute(s) and $(($DIFF % 60)) seconds."
 else
-echo -e "$red Compilation failed! Fix the errors!$nocol"
+echo "Compilation failed! Fix the errors!"
 fi
 
 
