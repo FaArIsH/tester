@@ -640,7 +640,9 @@ static void exit_mm(struct task_struct * tsk)
 {
 	struct mm_struct *mm = tsk->mm;
 	struct core_state *core_state;
+#ifndef CONFIG_UML
 	int mm_released;
+#endif
 
 	mm_release(tsk, mm);
 	if (!mm)
@@ -686,9 +688,11 @@ static void exit_mm(struct task_struct * tsk)
 	task_unlock(tsk);
 	mm_update_next_owner(mm);
 
+#ifndef CONFIG_UML
 	mm_released = mmput(mm);
 	if (mm_released)
 		set_tsk_thread_flag(tsk, TIF_MM_RELEASED);
+#endif
 }
 
 /*
@@ -1007,8 +1011,6 @@ void do_exit(long code)
 
 	if (group_dead)
 		disassociate_ctty(1);
-
-	module_put(task_thread_info(tsk)->exec_domain->module);
 
 	proc_exit_connector(tsk);
 

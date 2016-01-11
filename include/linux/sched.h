@@ -93,7 +93,6 @@ struct sched_param {
 
 #include <asm/processor.h>
 
-struct exec_domain;
 struct futex_pi_state;
 struct robust_list_head;
 struct bio_list;
@@ -2163,11 +2162,6 @@ extern void set_curr_task(int cpu, struct task_struct *p);
 
 void yield(void);
 
-/*
- * The default (Linux) execution domain.
- */
-extern struct exec_domain	default_exec_domain;
-
 union thread_union {
 	struct thread_info thread_info;
 	unsigned long stack[THREAD_SIZE/sizeof(long)];
@@ -2751,6 +2745,8 @@ static inline void set_task_cpu(struct task_struct *p, unsigned int cpu)
 }
 
 #endif /* CONFIG_SMP */
+
+extern struct atomic_notifier_head migration_notifier_head;
 
 extern long sched_setaffinity(pid_t pid, const struct cpumask *new_mask);
 extern long sched_getaffinity(pid_t pid, struct cpumask *mask);
