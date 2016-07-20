@@ -19,7 +19,7 @@
 #include <linux/sysfs.h>
 #include <linux/kernel.h>
 
-#include <linux/zapdos_charger_control.h>
+#include <linux/zd_charger_control.h>
 
 #define DRIVER_MAJOR_VERSION 		1
 #define DRIVER_MINOR_VERSION 		1
@@ -73,10 +73,10 @@ static ssize_t master_switch_store(struct kobject *kobj, struct kobj_attribute *
 	rc = check_switch_validity(val);
 	if(rc) {
 		master_switch = DEFAULT_SWITCH;
-		pr_info ("zapdos_charger_control: Invalid switch selection. Using default value %d\n", master_switch);
+		pr_info ("zd_charger_control: Invalid switch selection. Using default value %d\n", master_switch);
 	} else {
 		master_switch = val;
-		pr_info ("zapdos_charger_control: Switch - %d\n", master_switch);
+		pr_info ("zd_charger_control: Switch - %d\n", master_switch);
 	}
 
 	return count;
@@ -94,23 +94,12 @@ static ssize_t custom_current_store(struct kobject *kobj, struct kobj_attribute 
 	rc = check_current_limits(new_current);
 	if (rc) {
 		custom_current = DEFAULT_CURRENT;
-		pr_info ("zapdos_charger_control: Unsafe current input, switching to defalt value of %d\n", custom_current);
+		pr_info ("zd_charger_control: Unsafe current input, switching to defalt value of %d\n", custom_current);
 	} else {
 		custom_current = new_current;
 	}
 	return count;
 }
-
-static ssize_t max_custom_current_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
-{
-	return sprintf(buf, "%d", max_custom_current);
-}
-
-static ssize_t min_custom_current_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
-{
-	return sprintf(buf, "%d", min_custom_current);
-}
-
 
 static ssize_t charger_version_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
@@ -134,23 +123,12 @@ static struct kobj_attribute custom_current_attribute =
 		custom_current_show,
 		custom_current_store);
 
-static struct kobj_attribute max_custom_current_attribute =
-	__ATTR(version,
-		0444,
-		max_custom_current_show, NULL);
-
-static struct kobj_attribute min_custom_current_attribute =
-	__ATTR(version,
-		0444,
-		min_custom_current_show, NULL);
-
 
 static struct attribute *charger_control_attrs[] =
 	{
 		&custom_current_attribute.attr,
 		&master_switch_attribute.attr,
-		//&max_custom_current_attribute.attr,
-		//&min_custom_current_attribute.attr,
+		&charger_ctrl_ver_attribute.attr,
 		NULL,
 	};
 
@@ -166,7 +144,7 @@ static int charger_control_probe(void)
 	int sysfs_result;
 	printk(KERN_DEBUG "[%s]\n",__func__);
 
-	charger_control_kobj = kobject_create_and_add("zapdos_charger_control", kernel_kobj);
+	charger_control_kobj = kobject_create_and_add("zd_charger_control", kernel_kobj);
 
 	if (!charger_control_kobj) {
 		pr_err("%s Interface create failed!\n",
