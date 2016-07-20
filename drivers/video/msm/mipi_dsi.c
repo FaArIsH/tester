@@ -40,6 +40,10 @@
 #include <linux/cyttsp3_d2w.h>
 #endif
 
+#ifdef CONFIG_DYNAMIC_FSYNC
+#include <linux/dyn_sync_cntrl.h>
+#endif
+
 u32 dsi_irq;
 u32 esc_byte_ratio;
 
@@ -145,6 +149,10 @@ static int mipi_dsi_off(struct platform_device *pdev)
 
 #if defined(CONFIG_TOUCHSCREEN_CYTTSP3_D2W)
 	scr_suspended = true;
+#endif
+#ifdef CONFIG_DYNAMIC_FSYNC
+		// if dynamic fsync is defined call external suspend function
+		dyn_fsync_suspend();
 #endif
 
 	pr_debug("%s-:\n", __func__);
@@ -341,6 +349,10 @@ static int mipi_dsi_on(struct platform_device *pdev)
 #if defined(CONFIG_TOUCHSCREEN_CYTTSP3_D2W)
 	scr_suspended = false;
 #endif
+#ifdef CONFIG_DYNAMIC_FSYNC
+		// if dynamic fsync is defined call external resume function
+		dyn_fsync_resume();
+#endif	
 
 	pr_debug("%s-:\n", __func__);
 
