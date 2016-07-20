@@ -69,16 +69,6 @@ build_kernel() {
 	make
 }
 
-collect_files() {
-	cp $KERNEL_PATH $ZIP_DIR/tools/
-	find . -name '*.ko' -exec cp {} $ZIP_DIR/system/lib/modules \;
-}
-
-strip() {
-	cd $ZIP_DIR/system/lib/modules
-	$STRIP --strip-unneeded *.ko
-}
-
 make_zip() {
 	# TODO: Better do python and use the technique used by Android build system.
 	cd $ZIP_DIR
@@ -96,10 +86,6 @@ wrapper() {
 	if [ ! -f $KERNEL_PATH ];
 	then error "Build failed! Please fix the errors!" && exit
 	fi
-	info "Gathering all necessary files"
-	collect_files
-	info "Stripping modules"
-	strip
 	info "Making flashable zip"
 	make_zip
 	install $LOCAL_PATH/zip/archives/$ZIP_PREFIX-$(date +"%Y%m%d")-$DEVICE.zip
