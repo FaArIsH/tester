@@ -74,6 +74,7 @@
   Include Files
   ------------------------------------------------------------------------*/
 //#include <wlan_qct_driver.h>
+#include <linux/platform_device.h>
 #include <wlan_hdd_includes.h>
 #include <vos_api.h>
 #include <vos_sched.h>
@@ -130,7 +131,7 @@ int wlan_hdd_ftm_start(hdd_context_t *pAdapter);
 #ifdef MODULE
 #define WLAN_MODULE_NAME  module_name(THIS_MODULE)
 #else
-#define WLAN_MODULE_NAME  "wlan"
+#define WLAN_MODULE_NAME  "prima_wlan"
 #endif
 
 #ifdef TIMER_MANAGER
@@ -3946,11 +3947,11 @@ hdd_adapter_t* hdd_open_adapter( hdd_context_t *pHddCtx, tANI_U8 session_type,
          ret = register_inetaddr_notifier(&pAdapter->ipv4_notifier);
          if (ret)
          {
-             hddLog(LOGE, FL("Failed to register IPv4 notifier"));
+             hddLog(VOS_TRACE_LEVEL_ERROR, FL("Failed to register IPv4 notifier"));
          }
          else
          {
-             hddLog(LOG1, FL("Registered IPv4 notifier"));
+             hddLog(VOS_TRACE_LEVEL_INFO, FL("Registered IPv4 notifier"));
              pAdapter->ipv4_notifier_registered = true;
          }
 
@@ -3963,11 +3964,11 @@ hdd_adapter_t* hdd_open_adapter( hdd_context_t *pHddCtx, tANI_U8 session_type,
          ret = register_inet6addr_notifier(&pAdapter->ipv6_notifier);
          if (ret)
          {
-             hddLog(LOGE, FL("Failed to register IPv6 notifier"));
+             hddLog(VOS_TRACE_LEVEL_ERROR, FL("Failed to register IPv6 notifier"));
          }
          else
          {
-             hddLog(LOG1, FL("Registered IPv6 notifier"));
+             hddLog(VOS_TRACE_LEVEL_INFO, FL("Registered IPv6 notifier"));
              pAdapter->ipv6_notifier_registered = true;
          }
 #endif
@@ -6577,6 +6578,30 @@ static int __init hdd_module_init ( void)
 }
 #endif /* #ifdef MODULE */
 
+#if defined(CONFIG_PRIMA_WLAN) && !defined(CONFIG_PRIMA_WLAN_MODULE)
+static int
+wcnss_ready_probe(struct platform_device *pdev)
+{
+   return hdd_module_init();
+}
+
+static struct platform_driver wcnss_ready = {
+   .driver = {
+      .name = "wcnss_ready",
+      .owner = THIS_MODULE,
+   },
+   .probe = wcnss_ready_probe,
+};
+#endif
+
+static int __init hdd_module_init_first(void)
+{
+#if defined(CONFIG_PRIMA_WLAN) && !defined(CONFIG_PRIMA_WLAN_MODULE)
+   return platform_driver_register(&wcnss_ready);
+#else
+   return hdd_module_init();
+#endif
+}
 
 /**---------------------------------------------------------------------------
 
@@ -7216,7 +7241,7 @@ int wlan_hdd_scan_abort(hdd_adapter_t *pAdapter)
 }
 
 //Register the module init/exit functions
-module_init(hdd_module_init);
+module_init(hdd_module_init_first);
 module_exit(hdd_module_exit);
 
 MODULE_LICENSE("Dual BSD/GPL");
